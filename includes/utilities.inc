@@ -10,7 +10,7 @@
  * @return bool
  *   If JPEG-2000 appears in the list of supported formats.
  */
-function islandora_large_image_check_imagemagick_for_jpeg2000() {
+function islandora_codex_image_check_imagemagick_for_jpeg2000() {
   $supports =& drupal_static(__FUNCTION__);
 
   if ($supports === NULL) {

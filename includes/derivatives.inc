@@ -15,7 +15,7 @@
  * @return string
  *   The file path to the temp file if successful, FALSE otherwise.
  */
-function islandora_large_image_get_uploaded_file(AbstractObject $object) {
+function islandora_codex_image_get_uploaded_file(AbstractObject $object) {
   $base_name = str_replace(':', '-', $object->id);
   $mime_detector = new MimeDetect();
   $ext = $mime_detector->getExtension($object['OBJ']->mimeType);
@@ -36,18 +36,18 @@ function islandora_large_image_get_uploaded_file(AbstractObject $object) {
  * @return bool
  *   TRUE if successful, FALSE otherwise.
  */
-function islandora_large_image_create_jp2_derivative(AbstractObject $object, $force = TRUE) {
+function islandora_codex_image_create_jp2_derivative(AbstractObject $object, $force = TRUE) {
   $base_name = str_replace(':', '-', $object->id);
   if ($force || !isset($object['JP2'])) {
     $to_return = array(
       'success' => FALSE,
       'messages' => array(),
     );
-    $uploaded_file = islandora_large_image_get_uploaded_file($object);
+    $uploaded_file = islandora_codex_image_get_uploaded_file($object);
 
     // Create JP2 with kakadu.
-    module_load_include('inc', 'islandora_large_image', 'includes/utilities');
-    $kakadu = variable_get('islandora_use_kakadu', !islandora_large_image_check_imagemagick_for_jpeg2000());
+    module_load_include('inc', 'islandora_codex_image', 'includes/utilities');
+    $kakadu = variable_get('islandora_use_kakadu', !islandora_codex_image_check_imagemagick_for_jpeg2000());
     $mime = strtolower($object['OBJ']->mimetype);
     if ($mime == 'image/jpeg' || $mime == 'image/jpg') {
       $kakadu = FALSE;
@@ -55,7 +55,7 @@ function islandora_large_image_create_jp2_derivative(AbstractObject $object, $fo
     $lossless = variable_get('islandora_lossless', FALSE);
     // Use lossless if the image would look too bad with compression.
     if (!$lossless) {
-      $identify = islandora_large_image_get_identify();
+      $identify = islandora_codex_image_get_identify();
       $file = drupal_realpath($uploaded_file);
       // Define all these variables in one call for a large performance gain.
       list($height, $width, $y_resolution, $x_resolution) = explode(
@@ -71,10 +71,10 @@ function islandora_large_image_create_jp2_derivative(AbstractObject $object, $fo
     if ($kakadu) {
       // Create JP2.
       if (!$lossless) {
-        $derivative_file = islandora_large_image_kdu_compress($uploaded_file, "temporary://{$base_name}_JP2.jp2");
+        $derivative_file = islandora_codex_image_kdu_compress($uploaded_file, "temporary://{$base_name}_JP2.jp2");
       }
       else {
-        $derivative_file = islandora_large_image_kdu_compress(
+        $derivative_file = islandora_codex_image_kdu_compress(
           $uploaded_file,
           "temporary://{$base_name}_JP2.jp2",
           'Creversible=yes -rate -,1,0.5,0.25 Clevels=5'
@@ -91,10 +91,10 @@ function islandora_large_image_create_jp2_derivative(AbstractObject $object, $fo
       }
     }
     if (!$kakadu) {
-      $derivative_file = islandora_large_image_imagemagick_convert(
+      $derivative_file = islandora_codex_image_imagemagick_convert(
         $uploaded_file,
         "temporary://{$base_name}_JP2.jp2",
-        islandora_large_image_get_args($lossless)
+        islandora_codex_image_get_args($lossless)
       );
     }
     if ($derivative_file === FALSE) {
@@ -105,7 +105,7 @@ function islandora_large_image_create_jp2_derivative(AbstractObject $object, $fo
       );
     }
     else {
-      $added_successfully = islandora_large_image_add_datastream($object, 'JP2', $derivative_file, 'image/jp2', t('JPEG 2000'));
+      $added_successfully = islandora_codex_image_add_datastream($object, 'JP2', $derivative_file, 'image/jp2', t('JPEG 2000'));
       if (TRUE === $added_successfully) {
         $to_return['messages'][] = array(
           'message' => t('Created JP2 derivative.'),
@@ -140,7 +140,7 @@ function islandora_large_image_create_jp2_derivative(AbstractObject $object, $fo
  * @return bool
  *   TRUE if successful, FALSE otherwise.
  */
-function islandora_large_image_create_jpg_derivative(AbstractObject $object, $force = TRUE) {
+function islandora_codex_image_create_jpg_derivative(AbstractObject $object, $force = TRUE) {
   $base_name = str_replace(':', '-', $object->id);
   if ($force || !isset($object['JPG'])) {
     $to_return = array(
@@ -148,11 +148,11 @@ function islandora_large_image_create_jpg_derivative(AbstractObject $object, $fo
       'messages' => array(),
     );
 
-    $uploaded_file = islandora_large_image_get_uploaded_file($object);
+    $uploaded_file = islandora_codex_image_get_uploaded_file($object);
     $args = array();
     $args[] = '-resize ' . escapeshellarg("600 x 800");
     $args[] = '-quality ' . escapeshellarg(variable_get('imagemagick_quality', 75));
-    $derivative_file = islandora_large_image_imagemagick_convert($uploaded_file, "temporary://{$base_name}_JPG.jpg", $args);
+    $derivative_file = islandora_codex_image_imagemagick_convert($uploaded_file, "temporary://{$base_name}_JPG.jpg", $args);
     if ($derivative_file === FALSE) {
       $to_return['messages'][] = array(
         'message' => t('Failed to create JPG derivative.'),
@@ -161,7 +161,7 @@ function islandora_large_image_create_jpg_derivative(AbstractObject $object, $fo
       );
     }
     else {
-      $added_successfully = islandora_large_image_add_datastream($object, 'JPG', $derivative_file, 'image/jpeg', t('Medium sized JPEG'));
+      $added_successfully = islandora_codex_image_add_datastream($object, 'JPG', $derivative_file, 'image/jpeg', t('Medium sized JPEG'));
       if (TRUE === $added_successfully) {
         $to_return['messages'][] = array(
           'message' => t('Created JPG derivative.'),
@@ -197,7 +197,7 @@ function islandora_large_image_create_jpg_derivative(AbstractObject $object, $fo
  * @return bool
  *   TRUE if successful, FALSE otherwise.
  */
-function islandora_large_image_create_tn_derivative(AbstractObject $object, $force = TRUE) {
+function islandora_codex_image_create_tn_derivative(AbstractObject $object, $force = TRUE) {
   $base_name = str_replace(':', '-', $object->id);
   if ($force || !isset($object['TN'])) {
     $to_return = array(
@@ -205,12 +205,12 @@ function islandora_large_image_create_tn_derivative(AbstractObject $object, $for
       'messages' => array(),
     );
 
-    $uploaded_file = islandora_large_image_get_uploaded_file($object);
+    $uploaded_file = islandora_codex_image_get_uploaded_file($object);
 
     $args = array();
     $args[] = '-quality ' . escapeshellarg(variable_get('imagemagick_quality', 75));
     $args[] = '-resize ' . escapeshellarg("200 x 200");
-    $derivative_file = islandora_large_image_imagemagick_convert($uploaded_file, "temporary://{$base_name}_TN.jpg", $args);
+    $derivative_file = islandora_codex_image_imagemagick_convert($uploaded_file, "temporary://{$base_name}_TN.jpg", $args);
     if ($derivative_file === FALSE) {
       $to_return['messages'][] = array(
         'message' => t('Failed to create TN derivative.'),
@@ -219,7 +219,7 @@ function islandora_large_image_create_tn_derivative(AbstractObject $object, $for
       );
     }
     else {
-      $added_successfully = islandora_large_image_add_datastream($object, 'TN', $derivative_file, 'image/jpeg', t('Thumbnail'));
+      $added_successfully = islandora_codex_image_add_datastream($object, 'TN', $derivative_file, 'image/jpeg', t('Thumbnail'));
       if (TRUE === $added_successfully) {
         $to_return['messages'][] = array(
           'message' => t('Created TN derivative.'),
@@ -260,9 +260,9 @@ function islandora_large_image_create_tn_derivative(AbstractObject $object, $for
  * @return file
  *   Returns the newly generated file uri or FALSE if the conversion failed
  */
-function islandora_large_image_kdu_compress($src, $dest, $args = NULL) {
+function islandora_codex_image_kdu_compress($src, $dest, $args = NULL) {
   // Kakadu can't convert bit depth of 1.
-  $identify = islandora_large_image_get_identify();
+  $identify = islandora_codex_image_get_identify();
   $file = drupal_realpath($src);
   $depth = exec(escapeshellcmd("$identify -format %[depth] $file"));
   if ($depth == 1) {
@@ -272,17 +272,17 @@ function islandora_large_image_kdu_compress($src, $dest, $args = NULL) {
   $unlink_source = FALSE;
 
   // First, convert to (potentially uncompressed) TIFF file.
-  if (!islandora_large_image_is_uncompressed_tiff($src)) {
+  if (!islandora_codex_image_is_uncompressed_tiff($src)) {
     $c_args = array();
 
     // If the source is not a TIFF, or we have been instructed to uncompress
     // TIFFs, make it so.
-    if (!islandora_large_image_is_tiff($src) ||
-      variable_get('islandora_large_image_uncompress_tiff', TRUE)) {
+    if (!islandora_codex_image_is_tiff($src) ||
+      variable_get('islandora_codex_image_uncompress_tiff', TRUE)) {
       $c_args[] = "-compress None";
     }
     $c_dest = file_create_filename(drupal_basename($src) . ".tif", 'temporary://');
-    $src = islandora_large_image_imagemagick_convert($src, $c_dest, $c_args);
+    $src = islandora_codex_image_imagemagick_convert($src, $c_dest, $c_args);
     $unlink_source = TRUE;
   }
   // Default args.
@@ -333,7 +333,7 @@ function islandora_large_image_kdu_compress($src, $dest, $args = NULL) {
  * @return string
  *   The destination file path if successful otherwise FALSE.
  */
-function islandora_large_image_imagemagick_convert($src, $dest, $args) {
+function islandora_codex_image_imagemagick_convert($src, $dest, $args) {
   $src = drupal_realpath($src) ; // . '[0]';
   $dest = drupal_realpath($dest);
   $context = array(
@@ -354,7 +354,7 @@ function islandora_large_image_imagemagick_convert($src, $dest, $args) {
       '@command' => $command,
       '!output' => implode('<br/>', $output),
     );
-    watchdog('islandora_large_image', 'ImageMagick failed to convert.<br/>Error: @ret<br/>Command: @command <br/>Output !output', $variables, WATCHDOG_ERROR);
+    watchdog('islandora_codex_image', 'ImageMagick failed to convert.<br/>Error: @ret<br/>Command: @command <br/>Output !output', $variables, WATCHDOG_ERROR);
     return FALSE;
   }
   return $dest;
@@ -378,7 +378,7 @@ function islandora_large_image_imagemagick_convert($src, $dest, $args) {
  *   TRUE if the datastream was added/modified successfully, the error message
  *   otherwise.
  */
-function islandora_large_image_add_datastream(AbstractObject $object, $dsid, $file, $mimetype, $label) {
+function islandora_codex_image_add_datastream(AbstractObject $object, $dsid, $file, $mimetype, $label) {
   try {
     $ingest = !isset($object[$dsid]);
     if ($ingest) {
@@ -399,10 +399,10 @@ function islandora_large_image_add_datastream(AbstractObject $object, $dsid, $fi
     $variables = array(
       '@ret' => $e->getTraceAsString(),
     );
-    // Adding watchdog here, islandora_large_image_add_datastream() calls will
+    // Adding watchdog here, islandora_codex_image_add_datastream() calls will
     // add a dsm statement, but not a watchdog entry.
-    watchdog('islandora_large_image',
-      'Large Image failed to ingest data stream.<br/>Stack: @ret',
+    watchdog('islandora_codex_image',
+      'Codex Image failed to ingest data stream.<br/>Stack: @ret',
       $variables,
       WATCHDOG_ERROR);
     $message = $e->getMessage();
@@ -419,7 +419,7 @@ function islandora_large_image_add_datastream(AbstractObject $object, $dsid, $fi
  * @return array
  *   Returns the args
  */
-function islandora_large_image_get_args($lossless) {
+function islandora_codex_image_get_args($lossless) {
   if ($lossless) {
     $args[] = " -define numrlvls=6";
     $args[] = " -define jp2:tilewidth=1024";
@@ -456,8 +456,8 @@ function islandora_large_image_get_args($lossless) {
  *   A boolean indicating if the file contains a TIFF which is not compressed,
  *   (if it could be reencoded by the "free" version of Kakadu.
  */
-function islandora_large_image_is_uncompressed_tiff($file) {
-  $identify = islandora_large_image_get_identify();
+function islandora_codex_image_is_uncompressed_tiff($file) {
+  $identify = islandora_codex_image_get_identify();
 
   $file = drupal_realpath($file);
 
@@ -465,7 +465,7 @@ function islandora_large_image_is_uncompressed_tiff($file) {
 
   $compressed = (strtolower($compression) != 'none');
 
-  return !$compressed && islandora_large_image_is_tiff($file);
+  return !$compressed && islandora_codex_image_is_tiff($file);
 }
 
 /**
@@ -477,8 +477,8 @@ function islandora_large_image_is_uncompressed_tiff($file) {
  * @return bool
  *   A boolean indicating if the file contains a TIFF.
  */
-function islandora_large_image_is_tiff($file) {
-  $identify = islandora_large_image_get_identify();
+function islandora_codex_image_is_tiff($file) {
+  $identify = islandora_codex_image_get_identify();
 
   $file = drupal_realpath($file);
 
@@ -498,7 +498,7 @@ function islandora_large_image_is_tiff($file) {
  * @return string
  *   The command to run for "identify".
  */
-function islandora_large_image_get_identify() {
+function islandora_codex_image_get_identify() {
   // Get path for convert.
   $convert = variable_get('imagemagick_convert', 'convert');
 
@@ -522,17 +522,17 @@ function islandora_large_image_get_identify() {
  * @return bool
  *   TRUE if all derivatives were created successfully, FALSE otherwise.
  */
-function islandora_large_image_create_all_derivatives(AbstractObject $object, $force = TRUE) {
+function islandora_codex_image_create_all_derivatives(AbstractObject $object, $force = TRUE) {
   if (!isset($object['OBJ'])) {
     drupal_set_message(t('Could not create image derivatives for %s. No image file was uploaded.', array('%s' => $object->id)), 'error');
     return FALSE;
   }
   $base_name = str_replace(':', '-', $object->id);
-  $uploaded_file = islandora_large_image_get_uploaded_file($object, $base_name);
+  $uploaded_file = islandora_codex_image_get_uploaded_file($object, $base_name);
   if ($uploaded_file) {
-    $jp2 = islandora_large_image_create_JP2_derivative($object, $uploaded_file, $base_name, $force);
-    $jpg = islandora_large_image_create_JPG_derivative($object, $uploaded_file, $base_name, $force);
-    $tn = islandora_large_image_create_TN_derivative($object, $uploaded_file, $base_name, $force);
+    $jp2 = islandora_codex_image_create_JP2_derivative($object, $uploaded_file, $base_name, $force);
+    $jpg = islandora_codex_image_create_JPG_derivative($object, $uploaded_file, $base_name, $force);
+    $tn = islandora_codex_image_create_TN_derivative($object, $uploaded_file, $base_name, $force);
     return $jp2 && $jpg && $tn && file_unmanaged_delete($uploaded_file);
   }
   return FALSE;

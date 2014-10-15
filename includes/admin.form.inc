@@ -16,13 +16,13 @@
  * @return array
  *   The Drupal form definition.
  */
-function islandora_large_image_admin(array $form, array &$form_state) {
+function islandora_codex_image_admin(array $form, array &$form_state) {
   module_load_include('inc', 'islandora', 'includes/utilities');
-  module_load_include('inc', 'islandora_large_image', 'includes/utilities');
+  module_load_include('inc', 'islandora_codex_image', 'includes/utilities');
   $get_default_value = function($name, $default) use(&$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
-  $imagemagick_supports_jp2000 = islandora_large_image_check_imagemagick_for_jpeg2000();
+  $imagemagick_supports_jp2000 = islandora_codex_image_check_imagemagick_for_jpeg2000();
   $kakadu = $get_default_value('islandora_kakadu_url', '/usr/bin/kdu_compress');
   $form = array(
     'islandora_lossless' => array(
@@ -44,11 +44,11 @@ function islandora_large_image_admin(array $form, array &$form_state) {
                         t('ImageMagick does not report support for JPEG 2000.'),
                       )),
     ),
-    'islandora_large_image_uncompress_tiff' => array(
+    'islandora_codex_image_uncompress_tiff' => array(
       '#type' => 'checkbox',
       '#title' => t('Uncompress TIFF files prior to creating JP2 datastreams'),
       '#description' => t('The version of Kakadu shipped with djatoka does not support compressed TIFFs; therefore, it is likely desirable to uncompress the TIFF so Kakadu does not encounter an error. This will not change the original TIFF stored in the OBJ datastream. Only disable this if you are completely sure!'),
-      '#default_value' => $get_default_value('islandora_large_image_uncompress_tiff', TRUE),
+      '#default_value' => $get_default_value('islandora_codex_image_uncompress_tiff', TRUE),
       '#states' => array(
         'visible' => array(
           ':input[name="islandora_use_kakadu"]' => array('checked' => TRUE),
@@ -77,7 +77,7 @@ function islandora_large_image_admin(array $form, array &$form_state) {
     ),
   );
   module_load_include('inc', 'islandora', 'includes/solution_packs');
-  $form += islandora_viewers_form('islandora_large_image_viewers', 'image/jp2');
+  $form += islandora_viewers_form('islandora_codex_image_viewers', 'image/jp2');
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -85,7 +85,7 @@ function islandora_large_image_admin(array $form, array &$form_state) {
     '#type' => 'submit',
     '#value' => t('Reset to defaults'),
     '#weight' => 1,
-    '#submit' => array('islandora_large_image_admin_submit'),
+    '#submit' => array('islandora_codex_image_admin_submit'),
   );
   return system_settings_form($form);
 }
@@ -93,11 +93,11 @@ function islandora_large_image_admin(array $form, array &$form_state) {
 /**
  * Form submit.
  */
-function islandora_large_image_admin_submit($form, &$form_state) {
+function islandora_codex_image_admin_submit($form, &$form_state) {
   $op = $form_state['clicked_button']['#id'];
   switch ($op) {
     case 'edit-reset':
-      variable_del('islandora_large_image_viewers');
+      variable_del('islandora_codex_image_viewers');
       break;
   }
 }

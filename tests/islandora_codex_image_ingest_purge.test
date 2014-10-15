@@ -5,7 +5,7 @@
  * Attempts to ingest a TIFF into a randomly generated large image collection.
  */
 
-class IslandoraLargeImageIngestTestCase extends IslandoraCollectionWebTestCase {
+class IslandoraCodexImageIngestTestCase extends IslandoraCollectionWebTestCase {
 
   /**
    * Get test information.
@@ -14,9 +14,9 @@ class IslandoraLargeImageIngestTestCase extends IslandoraCollectionWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => 'Large Image Ingest/Purge',
+      'name' => 'Codex Image Ingest/Purge',
       'description' => 'Ingests and purges a TIFF image from a randomly generated large image collection',
-      'group' => 'Islandora Large Image',
+      'group' => 'Islandora Codex Image',
     );
   }
 
@@ -29,7 +29,7 @@ class IslandoraLargeImageIngestTestCase extends IslandoraCollectionWebTestCase {
     $this->imagemagick_convert = variable_get('imagemagick_convert', '/usr/bin/convert');
     parent::setUp(array(
      'islandora',
-     'islandora_large_image',
+     'islandora_codex_image',
      'islandora_basic_collection',
      'imagemagick',
      ));
@@ -38,7 +38,7 @@ class IslandoraLargeImageIngestTestCase extends IslandoraCollectionWebTestCase {
   /**
    * Creates an administrative user and attempts to ingest a test TIFF.
    */
-  public function testIngestPurgeLargeImage() {
+  public function testIngestPurgeCodexImage() {
 
     $user = $this->drupalCreateUser(array(
       'view fedora repository objects',
@@ -53,13 +53,13 @@ class IslandoraLargeImageIngestTestCase extends IslandoraCollectionWebTestCase {
     $label = $this->randomName(16);
     $suffix = $this->randomName(16);
     $collectionpid = 'islandora:' . $suffix;
-    $this->createTestCollection($label, 'islandora:sp_large_image_cmodel', $collectionpid);
+    $this->createTestCollection($label, 'islandora:sp_codex_image_cmodel', $collectionpid);
     variable_set('image_toolkit', 'imagemagick');
     variable_set('imagemagick_convert', $this->imagemagick_convert);
 
     // Attempts to create an object.
     $path = 'islandora/object/' . $collectionpid . '/manage/overview/ingest';
-    $file = drupal_get_path('module', 'islandora_large_image') . '/tests/fixtures/test.tiff';
+    $file = drupal_get_path('module', 'islandora_codex_image') . '/tests/fixtures/test.tiff';
     $handle = fopen($file, "r");
     $contents = fread($handle, filesize($file));
     fclose($handle);
@@ -67,7 +67,7 @@ class IslandoraLargeImageIngestTestCase extends IslandoraCollectionWebTestCase {
       'files[file]' => $file,
     );
     $this->drupalPost($path, $edit, t('Ingest'));
-    $this->assertText('New Object', 'Large image object was created', 'Islandora');
+    $this->assertText('New Object', 'Codex image object was created', 'Islandora');
     $object = $this->getObjectFromPath($this->url);
     $this->assertRaw('/datastream/JPG/view', 'JPG datastream visible on View page', 'Islandora');
 

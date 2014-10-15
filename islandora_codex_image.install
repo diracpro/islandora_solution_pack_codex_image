@@ -2,13 +2,13 @@
 
 /**
  * @file
- * islandora_large_image.install
+ * islandora_codex_image.install
  */
 
 /**
  * Implements hook_requirements().
  */
-function islandora_large_image_requirements($phase) {
+function islandora_codex_image_requirements($phase) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $requirements = array();
   if ($phase == 'install') {
@@ -39,19 +39,19 @@ function islandora_large_image_requirements($phase) {
 /**
  * Implements hook_install().
  *
- * @see islandora_large_image_islandora_required_objects()
+ * @see islandora_codex_image_islandora_required_objects()
  */
-function islandora_large_image_install() {
+function islandora_codex_image_install() {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
-  islandora_install_solution_pack('islandora_large_image');
+  islandora_install_solution_pack('islandora_codex_image');
 }
 
 /**
  * Implements hook_uninstall().
  */
-function islandora_large_image_uninstall() {
+function islandora_codex_image_uninstall() {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
-  islandora_install_solution_pack('islandora_large_image', 'uninstall');
-  $variables = array('islandora_large_image_viewers');
+  islandora_install_solution_pack('islandora_codex_image', 'uninstall');
+  $variables = array('islandora_codex_image_viewers');
   array_walk($variables, 'variable_del');
 }

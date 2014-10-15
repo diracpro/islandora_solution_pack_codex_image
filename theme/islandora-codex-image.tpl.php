@@ -21,18 +21,18 @@
  * @see theme_islandora_large_image()
  */
 ?>
-<div class="islandora-large-image-object islandora" vocab="http://schema.org/" prefix="dcterms: http://purl.org/dc/terms/" typeof="ImageObject">
-  <div class="islandora-large-image-content-wrapper clearfix">
+<div class="islandora_codex_image-object islandora" vocab="http://schema.org/" prefix="dcterms: http://purl.org/dc/terms/" typeof="ImageObject">
+  <div class="islandora_codex_image-content-wrapper clearfix">
     <?php if ($islandora_content): ?>
       <?php if (isset($image_clip)): ?>
         <?php print $image_clip; ?>
       <?php endif; ?>
-      <div class="islandora-large-image-content">
+      <div class="islandora_codex_image-content">
         <?php print $islandora_content; ?>
       </div>
     <?php endif; ?>
   </div>
-  <div class="islandora-large-image-metadata">
+  <div class="islandora_codex_image-metadata">
     <?php print $description; ?>
     <?php if ($parent_collections): ?>
       <div>

@@ -16,7 +16,7 @@
  * @return array
  *   The drupal form definition.
  */
-function islandora_large_image_image_upload_form(array $form, array &$form_state) {
+function islandora_codex_image_image_upload_form(array $form, array &$form_state) {
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $extensions = array('tiff tif jpg jpeg');
   return array(
@@ -44,7 +44,7 @@ function islandora_large_image_image_upload_form(array $form, array &$form_state
  * @param array $form_state
  *   The drupal form state.
  */
-function islandora_large_image_image_upload_form_submit(array $form, array &$form_state) {
+function islandora_codex_image_image_upload_form_submit(array $form, array &$form_state) {
   $object = $form_state['islandora']['objects'][0];
   if (empty($object['OBJ'])) {
     $ds = $object->constructDatastream('OBJ', 'M');
